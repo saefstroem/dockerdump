@@ -1,23 +1,34 @@
-use std::{fs, path::{Path, PathBuf}};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 use colored::Colorize;
 use dialoguer::{Input, MultiSelect, Select};
 
-use crate::{clean::cleanup, search::{io::{copy_path, search_files}, metadata::get_file_metadata}};
+use crate::{
+    clean::cleanup,
+    search::{
+        io::{copy_path, search_files},
+        metadata::get_file_metadata,
+    },
+};
 
 use super::browse::browse_directory;
-
 
 /// Interactive file search and selection interface
 pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
     let mut selected_files: Vec<PathBuf> = Vec::new();
-    
+
     loop {
         // Show current selection status
         if !selected_files.is_empty() {
             println!("\n{}", "Currently selected files:".blue());
             for file in &selected_files {
-                println!("  {}", file.strip_prefix(&temp_dir).unwrap_or(file).display());
+                println!(
+                    "  {}",
+                    file.strip_prefix(&temp_dir).unwrap_or(file).display()
+                );
             }
         }
 
@@ -38,7 +49,8 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
             .unwrap();
 
         match selection {
-            0 => { // Browse files
+            0 => {
+                // Browse files
                 let new_selections = browse_directory(&temp_dir, &temp_dir);
                 for path in new_selections {
                     if !selected_files.contains(&path) {
@@ -46,7 +58,8 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                     }
                 }
             }
-            1 => { // Search for files
+            1 => {
+                // Search for files
                 let search_term: String = Input::new()
                     .with_prompt("Enter search term")
                     .interact_text()
@@ -62,7 +75,8 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                 let display_paths: Vec<String> = matches
                     .iter()
                     .map(|p| {
-                        let relative_path = p.strip_prefix(&temp_dir).unwrap_or(p).display().to_string();
+                        let relative_path =
+                            p.strip_prefix(&temp_dir).unwrap_or(p).display().to_string();
                         let metadata = get_file_metadata(p);
                         format!("{} {}", metadata, relative_path)
                     })
@@ -89,7 +103,8 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                     }
                 }
             }
-            2 => { // View/remove selected files
+            2 => {
+                // View/remove selected files
                 if selected_files.is_empty() {
                     println!("{}", "No files currently selected.".yellow());
                     continue;
@@ -98,7 +113,8 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                 let display_paths: Vec<String> = selected_files
                     .iter()
                     .map(|p| {
-                        let relative_path = p.strip_prefix(&temp_dir).unwrap_or(p).display().to_string();
+                        let relative_path =
+                            p.strip_prefix(&temp_dir).unwrap_or(p).display().to_string();
                         let metadata = get_file_metadata(p);
                         format!("{} {}", metadata, relative_path)
                     })
@@ -115,7 +131,8 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                     selected_files.remove(*idx);
                 }
             }
-            3 => { // Extract selected files
+            3 => {
+                // Extract selected files
                 if selected_files.is_empty() {
                     println!("{}", "No files selected for extraction.".yellow());
                     continue;
@@ -135,13 +152,17 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                 println!("\n{}", "Extracting files...".green());
                 for file in &selected_files {
                     match copy_path(file, output_path) {
-                        Ok(_) => println!("✓ Extracted: {}", file.strip_prefix(&temp_dir).unwrap_or(file).display()),
+                        Ok(_) => println!(
+                            "✓ Extracted: {}",
+                            file.strip_prefix(&temp_dir).unwrap_or(file).display()
+                        ),
                         Err(e) => println!("✗ Failed to extract {}: {}", file.display(), e),
                     }
                 }
                 println!("{}", "Extraction complete.".green());
             }
-            4 => { // Exit
+            4 => {
+                // Exit
                 cleanup(temp_dir.to_str().unwrap())?;
                 println!("{}", "suh!".bold());
                 break;

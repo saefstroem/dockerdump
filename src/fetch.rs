@@ -1,19 +1,19 @@
-use std::{fs, io::Read, os::unix::fs::OpenOptionsExt, path::Path, str::FromStr};
 use colored::Colorize;
 use flate2::read::GzDecoder;
 use oci_distribution::{
-    client::{ClientConfig, ClientProtocol},
-    manifest::{IMAGE_LAYER_GZIP_MEDIA_TYPE, IMAGE_MANIFEST_MEDIA_TYPE},
-    secrets::RegistryAuth,
-    Client, Reference, RegistryOperation,
+    manifest::IMAGE_LAYER_GZIP_MEDIA_TYPE, secrets::RegistryAuth, Client, Reference,
 };
-use tar::{Archive, Builder, Header};
+use std::{fs, io::Read, os::unix::fs::OpenOptionsExt, path::Path, str::FromStr};
+use tar::Archive;
 
 use crate::clean::cleanup;
 
 static MEDIA_TYPE_ROOTFS_GZIP: &str = "application/vnd.docker.image.rootfs.diff.tar.gzip";
 
-pub async fn fetch_image(image: &str, registry: &str) -> Result<String, Box<dyn std::error::Error>> {
+pub async fn fetch_image(
+    image: &str,
+    registry: &str,
+) -> Result<String, Box<dyn std::error::Error>> {
     println!(
         "Fetching image {} from registry {}",
         image.blue().bold(),
@@ -21,7 +21,7 @@ pub async fn fetch_image(image: &str, registry: &str) -> Result<String, Box<dyn 
     );
 
     let client = Client::default();
-    let image_reference = Reference::from_str(image).unwrap();
+    let image_reference = Reference::from_str(&format!("{}/{}", registry, image)).unwrap();
 
     let image = client
         .pull(
@@ -52,13 +52,13 @@ pub async fn fetch_image(image: &str, registry: &str) -> Result<String, Box<dyn 
 
         // Custom extraction to handle permissions
         let mut archive = Archive::new(&decompressed[..]);
-        
+
         // Disable all permission preservation
         archive.set_preserve_permissions(false);
         archive.set_preserve_mtime(false);
         archive.set_preserve_ownerships(false);
         archive.set_unpack_xattrs(false);
-        
+
         // Process each entry with modified permissions
         for entry in archive.entries()? {
             let mut entry = entry?;
@@ -73,7 +73,7 @@ pub async fn fetch_image(image: &str, registry: &str) -> Result<String, Box<dyn 
             // Set permissive mode in the header
             let mut header = entry.header().clone();
             header.set_mode(0o666); // rw-rw-rw-
-            
+
             if header.entry_type().is_dir() {
                 fs::create_dir_all(&target)?;
             } else {

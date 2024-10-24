@@ -2,7 +2,6 @@ use std::{fs, path::Path};
 
 use colored::Colorize;
 
-
 /// Get human-readable file size
 pub fn format_size(size: u64) -> String {
     const UNITS: [&str; 6] = ["B", "KB", "MB", "GB", "TB", "PB"];
@@ -28,6 +27,10 @@ pub fn get_file_metadata(path: &Path) -> String {
         Err(_) => return "[Unknown] [????]".to_string(),
     };
     let size = metadata.len();
-    let file_type = if path.is_dir() { "DIR".blue() } else { "FILE".green() };
+    let file_type = if path.is_dir() {
+        "DIR".blue()
+    } else {
+        "FILE".green()
+    };
     format!("[{}] [{}]", format_size(size), file_type)
 }
