@@ -20,10 +20,14 @@ static ASCII_ART: &str = r"
         ";
 #[tokio::main]
 async fn main() {
+
+    // Main menu
     let menu_items = vec![
         "Default registry (docker.io)".to_string(),
         "Specify custom registry url".to_string(),
     ];
+
+    // Continously prompt for docker image and registry
     loop {
         println!("{}", ASCII_ART.blue().bold().italic());
         let docker_image: String = Input::new()
@@ -31,10 +35,12 @@ async fn main() {
         .interact_text()
         .unwrap();
 
+        // Exit if user types 'e'
         if docker_image == "e" {
             break;
         }
 
+        // Select registry
         let selection = Select::new()
             .with_prompt("Select container registry")
             .items(&menu_items)
@@ -42,38 +48,30 @@ async fn main() {
             .interact()
             .unwrap();
 
-        match selection {
+        let registry=match selection {
             0 => {
-                let registry = "docker.io";
-                match fetch::fetch_image(&docker_image, registry).await {
-                    Ok(temp_dir) => {
-                        println!("Image fetched and extracted to {}", temp_dir);
-                        // Start interactive search
-                        if let Err(e) = menu::interactive_search(temp_dir.into()).await {
-                            println!("Error during interactive search: {}", e);
-                        }
-                    }
-                    Err(e) => println!("Error fetching image: {}", e),
-                }
+                "docker.io".to_string()
             }
             1 => {
                 let registry: String = Input::new()
                     .with_prompt("Enter custom registry url")
                     .interact_text()
                     .unwrap();
-                match fetch::fetch_image(&docker_image, &registry).await {
-                    Ok(temp_dir) => {
-                        println!("Image fetched and extracted to {}", temp_dir);
-                        // Start interactive search
-                        if let Err(e) = menu::interactive_search(temp_dir.into()).await {
-                            println!("Error during interactive search: {}", e);
-                        }
-                    }
-                    Err(e) => println!("Error fetching image: {}", e),
+                registry
+            }
+            _ => unreachable!(),
+        };
+
+        // Fetch the docker image and extract it
+        match fetch::fetch_image(&docker_image, &registry).await {
+            Ok(temp_dir) => {
+                println!("Image fetched and extracted to {}", temp_dir);
+                // Start interactive search
+                if let Err(e) = menu::interactive_search(temp_dir.into()).await {
+                    println!("Error during interactive search: {}", e);
                 }
             }
-            2 => break,
-            _ => unreachable!(),
+            Err(e) => println!("Error fetching image: {}", e),
         }
 
     }

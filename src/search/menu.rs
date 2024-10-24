@@ -16,6 +16,19 @@ use crate::{
 
 use super::browse::browse_directory;
 
+fn format_paths_for_display(paths: &[PathBuf], temp_dir: &Path) -> Vec<String> {
+    // Format paths for display by stripping the temp directory and adding metadata
+    let display_paths: Vec<String> = paths
+        .iter()
+        .map(|p| {
+            let relative_path = p.strip_prefix(&temp_dir).unwrap_or(p).display().to_string();
+            let metadata = get_file_metadata(p);
+            format!("{} {}", metadata, relative_path)
+        })
+        .collect();
+    display_paths
+}
+
 /// Interactive file search and selection interface
 pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
     let mut selected_files: Vec<PathBuf> = Vec::new();
@@ -25,6 +38,7 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
         if !selected_files.is_empty() {
             println!("\n{}", "Currently selected files:".blue().bold());
             for file in &selected_files {
+                // Strip the temp directory as it's not relevant to the user
                 println!(
                     "  {}",
                     file.strip_prefix(&temp_dir).unwrap_or(file).display()
@@ -41,6 +55,7 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
             "Exit".to_string(),
         ];
 
+        // Select action
         let selection = Select::new()
             .with_prompt("What would you like to do?")
             .items(&menu_items)
@@ -53,6 +68,7 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                 // Browse files
                 let new_selections = browse_directory(&temp_dir, &temp_dir);
                 for path in new_selections {
+                    // If anything new was selected, add it to our list
                     if !selected_files.contains(&path) {
                         selected_files.push(path);
                     }
@@ -65,22 +81,14 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                     .interact_text()
                     .unwrap();
 
+                // Search for files matching the search term
                 let matches = search_files(&temp_dir, &search_term);
 
+                // If no matches, inform the user and continue
                 if matches.is_empty() {
                     println!("{}", "No files found matching your search.".yellow());
                     continue;
                 }
-
-                let display_paths: Vec<String> = matches
-                    .iter()
-                    .map(|p| {
-                        let relative_path =
-                            p.strip_prefix(&temp_dir).unwrap_or(p).display().to_string();
-                        let metadata = get_file_metadata(p);
-                        format!("{} {}", metadata, relative_path)
-                    })
-                    .collect();
 
                 println!(
                     "\n{} {} {}",
@@ -89,14 +97,17 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                     "matching file(s):".green()
                 );
 
+                // Prompt user to select files, storing the selections as the index of the matches
+                // which in this case is the same as the index of the display_paths
                 let selections = MultiSelect::new()
                     .with_prompt("Select files to add (Space to select, Enter to confirm)")
-                    .items(&display_paths)
+                    .items(&format_paths_for_display(&matches, &temp_dir))
                     .interact()
                     .unwrap();
 
                 // Add selected files to our list
                 for idx in selections {
+                    // If the file isn't already selected, add it
                     let path = &matches[idx];
                     if !selected_files.contains(path) {
                         selected_files.push(path.clone());
@@ -110,19 +121,9 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                     continue;
                 }
 
-                let display_paths: Vec<String> = selected_files
-                    .iter()
-                    .map(|p| {
-                        let relative_path =
-                            p.strip_prefix(&temp_dir).unwrap_or(p).display().to_string();
-                        let metadata = get_file_metadata(p);
-                        format!("{} {}", metadata, relative_path)
-                    })
-                    .collect();
-
                 let selections = MultiSelect::new()
                     .with_prompt("Select files to remove (Space to select, Enter to remove)")
-                    .items(&display_paths)
+                    .items(&format_paths_for_display(&selected_files, &temp_dir))
                     .interact()
                     .unwrap();
 
@@ -138,6 +139,7 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
                     continue;
                 }
 
+                // 
                 let output_dir: String = Input::new()
                     .with_prompt("Enter output directory")
                     .default(".".into())
