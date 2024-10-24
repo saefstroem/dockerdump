@@ -5,7 +5,6 @@ use oci_distribution::{
 };
 use std::{fs, io::Read, os::unix::fs::OpenOptionsExt, path::Path, str::FromStr};
 use tar::Archive;
-
 use crate::clean::cleanup;
 
 static MEDIA_TYPE_ROOTFS_GZIP: &str = "application/vnd.docker.image.rootfs.diff.tar.gzip";
