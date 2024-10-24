@@ -1,0 +1,16 @@
+[package]
+name = "dockerdump"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+chrono = "0.4.38"
+clap = "4.5.20"
+colored = "2.1.0"
+dialoguer = "0.11.0"
+flate2 = "1.0.34"
+oci-distribution = "0.11.0"
+tar = "0.4.42"
+tokio = {version="1.41.0",features=["full"]}
+uuid = { version = "1.11.0", features = ["v4"] }
+walkdir = "2.5.0"
