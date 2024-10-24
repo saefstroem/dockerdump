@@ -4,8 +4,6 @@ use colored::*;
 use crate::{fetch::fetch_image, search::menu::interactive_search};
 
 static ASCII_ART: &str = r"
-
-        Extract files from docker images.
          .--.           
         /    \ .--.  
         |  O   /    \ 
@@ -18,8 +16,6 @@ static ASCII_ART: &str = r"
         '-----------'
         A whale in a bucket.
         @https://github.com/saefstroem/dockerdump
-        @saefstroem
-        @license MIT
         ";
 
 static DEFAULT_REGISTRY: &str = "docker.io";
@@ -27,9 +23,10 @@ static DEFAULT_REGISTRY: &str = "docker.io";
 pub async fn extract_args() {
     let matches = Command::new("dockerdump")
         .long_about(ASCII_ART)
+        .about(ASCII_ART)
         .subcommand(
             Command::new("extract")
-                .about(ASCII_ART)
+                .about("extracts files from a docker image. Specify custom registry with -r=<registry_url>")
                 .arg(
                     Arg::new("image")
                         .required(true)

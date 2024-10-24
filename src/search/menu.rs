@@ -23,7 +23,7 @@ pub async fn interactive_search(temp_dir: PathBuf) -> std::io::Result<()> {
     loop {
         // Show current selection status
         if !selected_files.is_empty() {
-            println!("\n{}", "Currently selected files:".blue());
+            println!("\n{}", "Currently selected files:".blue().bold());
             for file in &selected_files {
                 println!(
                     "  {}",

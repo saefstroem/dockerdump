@@ -32,7 +32,7 @@ pub fn browse_directory(current_dir: &Path, base_dir: &Path) -> Vec<PathBuf> {
         });
 
         // Create display items
-        let mut display_items = vec!["[<-] Parent Directory".blue().to_string()]; // Parent directory option
+        let mut display_items = vec!["[<-] Parent Directory".blue().bold().to_string()]; // Parent directory option
         display_items.extend(entries.iter().map(|e| {
             let path = e.path();
             let metadata = get_file_metadata(&path);

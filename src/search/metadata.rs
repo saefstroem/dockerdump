@@ -28,9 +28,9 @@ pub fn get_file_metadata(path: &Path) -> String {
     };
     let size = metadata.len();
     let file_type = if path.is_dir() {
-        "DIR".blue()
+        "DIR".blue().bold()
     } else {
-        "FILE".green()
+        "FILE".green().bold()
     };
     format!("[{}] [{}]", format_size(size), file_type)
 }
