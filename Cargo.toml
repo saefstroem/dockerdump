@@ -2,6 +2,11 @@
 name = "dockerdump"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Extract any file from any Docker image."
+repository = "https://github.com/saefstroem/dockerdump"
+keywords = ["docker", "extract","container"]
+categories = ["virtualization"]
 
 [dependencies]
 chrono = "0.4.38"
