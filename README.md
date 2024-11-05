@@ -2,24 +2,11 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Crates.io](https://img.shields.io/crates/v/dockerdump)](https://crates.io/crates/dockerdump)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/saefstroem/dockerdump/rust.yml)
-
-
-```
-         .--.           
-        /    \ .--.  
-        |  O   /    \ 
-        .--'    '-----'
-        |  .-~~-.     |
-        | /      \    |
-        ||       |    | Dockerdump.
-        | \      /    |
-        |  `---'      |
-        '-----------'
-        A whale in a bucket.
-```
+[![Rust](https://github.com/saefstroem/dockerdump/actions/workflows/rust.yml/badge.svg)](https://github.com/saefstroem/dockerdump/actions/workflows/rust.yml)
 
 Dockerdump is an interactive tool for fetching and extracting files from Docker container images. It allows you to download images from Docker Hub or custom registries and browse their contents with an intuitive interface.
+
+Suppose there is some binary that you know is compatible with your system, but the building process is complex or time-consuming. You can use Dockerdump to extract the binary from a Docker image and run it on your machine without the overhead of using Docker or dealing with the docker daemon.
 
 ## Features
 
